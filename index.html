@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+
+</head>
+<body>
+    <form id="my-form">
+        <textarea id="text-area" cols="9" rows="3"></textarea>
+        <button>send message</button>
+    </form>
+    <div id="my-messanger">
+        <ul id="message-list">
+
+        </ul>
+    </div>
+    <script>
+        
+        console.log('started');
+
+        const ws = new WebSocket('ws://localhost:9000');
+
+        ws.onopen = (x) => {
+            
+            console.log('connection is opened');
+        }
+
+        ws.onmessage = (message) => {
+
+            const data = JSON.parse(message.data) ;
+
+            console.log(data);
+
+            const ul = document.getElementById('message-list');
+
+            const newli =  document.createElement('li');
+
+            const newSpan = document.createElement('span') ;
+            
+
+            const s1 = newSpan.cloneNode();
+            s1.innerText = data.payload.message ;
+            const s2 = newSpan.cloneNode();
+            s2.innerText = data.payload.author ;
+            newli.append(s2);
+            newli.append('---');
+            newli.append(s1); 
+            ul.append(newli);
+
+        }
+
+        const form = document.getElementById('my-form');
+
+        form.onsubmit = (e) => {
+            e.preventDefault();
+            onSendMessage(e);
+        }
+
+        function onSendMessage (e) {
+
+            const textarea = document.getElementById('text-area');
+            const text = textarea.value;
+            const access_token = localStorage.access_token ;
+
+            if(ws.OPEN) {
+
+                const message = {
+                    auth:access_token ,
+                    payload:{
+                        message:text ,
+                    }
+                }
+
+                ws.send(JSON.stringify(message));
+                console.log('u send message: ' + text);
+            }
+        }
+
+
+    </script>
+    <style>
+
+        #my-messanger {
+            background-color: #244f5a;
+            padding: 9px;
+            display: flex;
+            color: #cbd5d7;
+            font-size: 2em;
+            flex-direction: column;
+            height: 81vh;
+        }
+
+        li {
+            display: flex ;
+            gap: 9px ;
+        }
+
+    </style>
+</body>
+</html>
